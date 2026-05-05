@@ -1,13 +1,15 @@
 const Report = require('../models/Report');
 const { uploadFileLocally } = require('../helpers/localUpload');
+const { uploadFileToS3 } = require('../helpers/s3Upload');
+const { convertS3ToCloudFront } = require('../helpers/cloudfront');
 
 /**
  * POST /api/reports
- * Create new report with file upload to S3
+ * Create new report with file upload (S3 for production, local for dev)
  */
 exports.createReport = async (req, res) => {
   try {
-    const { pelapor_nama, jenis_gangguan, lokasi, deskripsi } = req.body;
+    const { pelapor_nama, jenis_gangguan, lokasi, deskripsi, latitude, longitude } = req.body;
 
     // Validate required fields
     if (!pelapor_nama || !jenis_gangguan || !lokasi) {
@@ -18,17 +20,27 @@ exports.createReport = async (req, res) => {
     }
 
     let imageUrl = null;
+    let uploadedVia = 'none';
 
-    // Upload file locally if exists
+    // Upload file if provided
     if (req.file) {
       try {
-        imageUrl = await uploadFileLocally(req.file);
+        // Use S3 in production, local storage in development
+        if (process.env.NODE_ENV === 'production' && process.env.S3_BUCKET_NAME) {
+          imageUrl = await uploadFileToS3(req.file);
+          // Transform S3 URL to CloudFront URL
+          if (process.env.CLOUDFRONT_URL) {
+            imageUrl = convertS3ToCloudFront(imageUrl);
+          }
+          uploadedVia = 'S3 + CloudFront';
+        } else {
+          imageUrl = await uploadFileLocally(req.file);
+          uploadedVia = 'Local Storage';
+        }
       } catch (uploadError) {
-        return res.status(500).json({
-          success: false,
-          message: 'Failed to upload file',
-          error: uploadError.message,
-        });
+        console.error('Error uploading file:', uploadError);
+        // Don't fail report creation if upload fails
+        console.warn('⚠️ File upload failed, continuing without image');
       }
     }
 
@@ -46,6 +58,7 @@ exports.createReport = async (req, res) => {
       success: true,
       message: 'Report created successfully',
       data: report.toJSON(),
+      uploadedVia,
     });
   } catch (error) {
     console.error('Error creating report:', error);
@@ -59,29 +72,28 @@ exports.createReport = async (req, res) => {
 
 /**
  * GET /api/reports
- * Get all reports with CloudFront URLs
+ * Get all reports with proper URLs
  */
 exports.getAllReports = async (req, res) => {
   try {
-    // Check if database is available
-    if (!Report.sequelize || !Report.sequelize.authenticate) {
-      return res.status(503).json({
-        success: false,
-        message: 'Database is not available',
-        data: [], // Return empty array for frontend
-        note: 'Backend is running but database connection failed. Check server logs.',
-      });
-    }
-
     const reports = await Report.findAll({
       order: [['created_at', 'DESC']],
+    });
+
+    // Transform S3 URLs to CloudFront if in production
+    let transformedReports = reports.map(report => {
+      const reportData = report.toJSON();
+      if (reportData.image_url && process.env.NODE_ENV === 'production' && process.env.CLOUDFRONT_URL) {
+        reportData.image_url = convertS3ToCloudFront(reportData.image_url);
+      }
+      return reportData;
     });
 
     res.status(200).json({
       success: true,
       message: 'Reports retrieved successfully',
-      data: reports,
-      total: reports.length,
+      data: transformedReports,
+      total: transformedReports.length,
     });
   } catch (error) {
     console.error('Error fetching reports:', error);
@@ -111,10 +123,16 @@ exports.getReportById = async (req, res) => {
       });
     }
 
+    // Transform S3 URL to CloudFront
+    const reportData = report.toJSON();
+    if (reportData.image_url && process.env.NODE_ENV === 'production' && process.env.CLOUDFRONT_URL) {
+      reportData.image_url = convertS3ToCloudFront(reportData.image_url);
+    }
+
     res.status(200).json({
       success: true,
       message: 'Report retrieved successfully',
-      data: report.toJSON(),
+      data: reportData,
     });
   } catch (error) {
     console.error('Error fetching report:', error);
@@ -193,11 +211,20 @@ exports.getReportsByStatus = async (req, res) => {
       order: [['created_at', 'DESC']],
     });
 
+    // Transform S3 URLs to CloudFront
+    let transformedReports = reports.map(report => {
+      const reportData = report.toJSON();
+      if (reportData.image_url && process.env.NODE_ENV === 'production' && process.env.CLOUDFRONT_URL) {
+        reportData.image_url = convertS3ToCloudFront(reportData.image_url);
+      }
+      return reportData;
+    });
+
     res.status(200).json({
       success: true,
       message: `Reports with status '${status}' retrieved successfully`,
-      data: reports,
-      total: reports.length,
+      data: transformedReports,
+      total: transformedReports.length,
     });
   } catch (error) {
     console.error('Error fetching reports by status:', error);

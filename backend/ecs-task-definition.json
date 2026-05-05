@@ -2,12 +2,12 @@
   "family": "sigap-backend-task",
   "networkMode": "awsvpc",
   "requiresCompatibilities": ["FARGATE"],
-  "cpu": "256",
-  "memory": "512",
+  "cpu": "512",
+  "memory": "1024",
   "containerDefinitions": [
     {
       "name": "sigap-backend",
-      "image": "SIGAP_BACKEND_IMAGE_PLACEHOLDER",
+      "image": "ACCOUNT_ID.dkr.ecr.ap-southeast-1.amazonaws.com/sigap-backend:latest",
       "portMappings": [
         {
           "containerPort": 5000,
@@ -27,6 +27,18 @@
         {
           "name": "AWS_REGION",
           "value": "ap-southeast-1"
+        },
+        {
+          "name": "S3_BUCKET_NAME",
+          "value": "sigap-storage-bucket-name"
+        },
+        {
+          "name": "CLOUDFRONT_URL",
+          "value": "https://d12345abcde.cloudfront.net"
+        },
+        {
+          "name": "CORS_ORIGIN",
+          "value": "https://your-frontend-domain.com"
         }
       ],
       "secrets": [
@@ -48,6 +60,40 @@
         },
         {
           "name": "DB_NAME",
+          "valueFrom": "arn:aws:secretsmanager:ap-southeast-1:ACCOUNT_ID:secret:sigap/db-name"
+        },
+        {
+          "name": "AWS_ACCESS_KEY_ID",
+          "valueFrom": "arn:aws:secretsmanager:ap-southeast-1:ACCOUNT_ID:secret:sigap/aws-access-key"
+        },
+        {
+          "name": "AWS_SECRET_ACCESS_KEY",
+          "valueFrom": "arn:aws:secretsmanager:ap-southeast-1:ACCOUNT_ID:secret:sigap/aws-secret-key"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/sigap-backend",
+          "awslogs-region": "ap-southeast-1",
+          "awslogs-stream-prefix": "ecs"
+        }
+      },
+      "healthCheck": {
+        "command": [
+          "CMD-SHELL",
+          "curl -f http://localhost:5000/health || exit 1"
+        ],
+        "interval": 30,
+        "timeout": 5,
+        "retries": 3,
+        "startPeriod": 60
+      }
+    }
+  ],
+  "executionRoleArn": "arn:aws:iam::ACCOUNT_ID:role/ecsTaskExecutionRole",
+  "taskRoleArn": "arn:aws:iam::ACCOUNT_ID:role/ecsTaskRole"
+}
           "valueFrom": "arn:aws:secretsmanager:ap-southeast-1:ACCOUNT_ID:secret:sigap/db-name"
         },
         {

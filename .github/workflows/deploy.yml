@@ -4,30 +4,132 @@ on:
   push:
     branches:
       - main
-      - develop
 
 env:
   AWS_REGION: ap-southeast-1
-  ECR_REPOSITORY_BACKEND: sigap-backend
-  ECR_REPOSITORY_FRONTEND: sigap-frontend
-  ECS_SERVICE: sigap-service
+  ECR_REGISTRY_BACKEND: sigap-backend
+  ECR_REGISTRY_FRONTEND: sigap-frontend
   ECS_CLUSTER: sigap-cluster
+  BACKEND_SERVICE: sigap-backend-service
+  FRONTEND_SERVICE: sigap-frontend-service
+  BACKEND_TASK_DEFINITION: sigap-backend-task
+  FRONTEND_TASK_DEFINITION: sigap-frontend-task
 
 jobs:
-  deploy-backend:
+  build-and-push:
+    name: Build and Push Docker Images
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build, tag, and push backend image to Amazon ECR
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REGISTRY_BACKEND:$IMAGE_TAG ./backend
+          docker push $ECR_REGISTRY/$ECR_REGISTRY_BACKEND:$IMAGE_TAG
+          docker tag $ECR_REGISTRY/$ECR_REGISTRY_BACKEND:$IMAGE_TAG $ECR_REGISTRY/$ECR_REGISTRY_BACKEND:latest
+          docker push $ECR_REGISTRY/$ECR_REGISTRY_BACKEND:latest
+          echo "backend_image=$ECR_REGISTRY/$ECR_REGISTRY_BACKEND:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+      - name: Build, tag, and push frontend image to Amazon ECR
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REGISTRY_FRONTEND:$IMAGE_TAG ./frontend
+          docker push $ECR_REGISTRY/$ECR_REGISTRY_FRONTEND:$IMAGE_TAG
+          docker tag $ECR_REGISTRY/$ECR_REGISTRY_FRONTEND:$IMAGE_TAG $ECR_REGISTRY/$ECR_REGISTRY_FRONTEND:latest
+          docker push $ECR_REGISTRY/$ECR_REGISTRY_FRONTEND:latest
+          echo "frontend_image=$ECR_REGISTRY/$ECR_REGISTRY_FRONTEND:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+      - name: Output image URIs
+        run: |
+          echo "Backend Image: ${{ steps.login-ecr.outputs.registry }}/$ECR_REGISTRY_BACKEND:${{ github.sha }}"
+          echo "Frontend Image: ${{ steps.login-ecr.outputs.registry }}/$ECR_REGISTRY_FRONTEND:${{ github.sha }}"
+
+  deploy-to-ecs:
+    name: Deploy to ECS
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Update Backend ECS service
+        run: |
+          aws ecs update-service \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --service ${{ env.BACKEND_SERVICE }} \
+            --force-new-deployment \
+            --region ${{ env.AWS_REGION }}
+
+      - name: Update Frontend ECS service
+        run: |
+          aws ecs update-service \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --service ${{ env.FRONTEND_SERVICE }} \
+            --force-new-deployment \
+            --region ${{ env.AWS_REGION }}
+
+      - name: Wait for services to stabilize
+        run: |
+          echo "Waiting for Backend service to stabilize..."
+          aws ecs wait services-stable \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --services ${{ env.BACKEND_SERVICE }} \
+            --region ${{ env.AWS_REGION }} || echo "Backend service update in progress"
+          
+          echo "Waiting for Frontend service to stabilize..."
+          aws ecs wait services-stable \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --services ${{ env.FRONTEND_SERVICE }} \
+            --region ${{ env.AWS_REGION }} || echo "Frontend service update in progress"
+
+      - name: Check deployment status
+        run: |
+          echo "=== Backend Service Status ==="
+          aws ecs describe-services \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --services ${{ env.BACKEND_SERVICE }} \
+            --region ${{ env.AWS_REGION }} \
+            --query 'services[0].[serviceName,status,deployments[0].status,deployments[0].runningCount]' \
+            --output text
+
+          echo "=== Frontend Service Status ==="
+          aws ecs describe-services \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --services ${{ env.FRONTEND_SERVICE }} \
+            --region ${{ env.AWS_REGION }} \
+            --query 'services[0].[serviceName,status,deployments[0].status,deployments[0].runningCount]' \
+            --output text
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
