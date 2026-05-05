@@ -1,0 +1,128 @@
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: [
+    "./index.html",
+    "./src/**/*.{js,jsx}",
+  ],
+  theme: {
+    extend: {
+      colors: {
+        // Material Design 3 - SIGAP Theme (aligned to design HTML)
+        'sigap-blue': '#1e3a8a',
+        'primary': '#1e3a8a',
+        'primary-container': '#1e3a8a',
+        'primary-fixed': '#dce1ff',
+        'primary-fixed-dim': '#b6c4ff',
+        'on-primary': '#ffffff',
+        'on-primary-fixed': '#00164e',
+        'on-primary-fixed-variant': '#264191',
+        'secondary': '#515f74',
+        'secondary-container': '#d5e3fc',
+        'secondary-fixed': '#d5e3fc',
+        'secondary-fixed-dim': '#b9c7df',
+        'on-secondary': '#ffffff',
+        'on-secondary-container': '#57657a',
+        'on-secondary-fixed': '#0d1c2e',
+        'on-secondary-fixed-variant': '#3a485b',
+        'tertiary': '#4b1c00',
+        'tertiary-container': '#6e2c00',
+        'tertiary-fixed': '#ffdbcb',
+        'tertiary-fixed-dim': '#ffb691',
+        'on-tertiary': '#ffffff',
+        'on-tertiary-container': '#f39461',
+        'on-tertiary-fixed': '#341100',
+        'on-tertiary-fixed-variant': '#773205',
+        'error': '#ba1a1a',
+        'error-container': '#ffdad6',
+        'on-error': '#ffffff',
+        'on-error-container': '#93000a',
+        'background': '#faf8ff',
+        'surface': '#faf8ff',
+        'surface-bright': '#faf8ff',
+        'surface-dim': '#dad9e1',
+        'surface-container': '#eeedf4',
+        'surface-container-low': '#f4f3fa',
+        'surface-container-lowest': '#ffffff',
+        'surface-container-high': '#e9e7ef',
+        'surface-container-highest': '#e3e1e9',
+        'surface-variant': '#e3e1e9',
+        'inverse-surface': '#2f3036',
+        'inverse-on-surface': '#f1f0f7',
+        'inverse-primary': '#b6c4ff',
+        'on-surface': '#1a1b21',
+        'on-surface-variant': '#444651',
+        'outline': '#757682',
+        'outline-variant': '#c5c5d3',
+        'surface-tint': '#4059aa',
+        'on-background': '#1a1b21',
+      },
+      fontFamily: {
+        'inter': ['Inter', 'sans-serif'],
+      },
+      fontSize: {
+        'h1': ['48px', { lineHeight: '56px', fontWeight: '700' }],
+        'h2': ['40px', { lineHeight: '48px', fontWeight: '700' }],
+        'h3': ['32px', { lineHeight: '40px', fontWeight: '700' }],
+        'h4': ['28px', { lineHeight: '36px', fontWeight: '600' }],
+        'h5': ['24px', { lineHeight: '32px', fontWeight: '600' }],
+        'h6': ['20px', { lineHeight: '28px', fontWeight: '600' }],
+        'body-lg': ['18px', { lineHeight: '28px', fontWeight: '400' }],
+        'body-md': ['16px', { lineHeight: '24px', fontWeight: '400' }],
+        'body-sm': ['14px', { lineHeight: '20px', fontWeight: '400' }],
+        'label-md': ['14px', { lineHeight: '20px', fontWeight: '600' }],
+        'label-sm': ['12px', { lineHeight: '16px', fontWeight: '600' }],
+        'label-xs': ['11px', { lineHeight: '16px', fontWeight: '600' }],
+      },
+      spacing: {
+        'gutter': '16px',
+      },
+      borderRadius: {
+        'none': '0',
+        'sm': '4px',
+        'DEFAULT': '8px',
+        'md': '12px',
+        'lg': '16px',
+        'xl': '20px',
+        '2xl': '28px',
+        '3xl': '32px',
+        'full': '9999px',
+      },
+    },
+  },
+  plugins: [
+    function({ addBase, addComponents, theme }) {
+      addBase({
+        '@font-face': {
+          fontFamily: 'Material Symbols Outlined',
+          src: 'url("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200")',
+        },
+      })
+
+      addComponents({
+        '.glass-card': {
+          '@apply bg-white/50 backdrop-blur-xl border border-white/20 transition-all duration-300': {},
+        },
+        '.glass-nav': {
+          '@apply bg-white/70 backdrop-blur-xl border-b border-white/20': {},
+        },
+        '.text-shadow-sm': {
+          textShadow: '0 1px 2px rgba(0,0,0,0.05)',
+        },
+        '.material-symbols-outlined': {
+          fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24",
+          fontFamily: '"Material Symbols Outlined"',
+          fontWeight: 'normal',
+          fontStyle: 'normal',
+          fontSize: '24px',
+          display: 'inline-block',
+          lineHeight: 1,
+          textTransform: 'none',
+          letterSpacing: 'normal',
+          wordWrap: 'normal',
+          whiteSpace: 'nowrap',
+          direction: 'ltr',
+        },
+      })
+    },
+  ],
+}

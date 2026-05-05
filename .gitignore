@@ -1,0 +1,47 @@
+# Dependencies
+node_modules/
+package-lock.json
+npm-debug.log
+yarn-error.log
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs
+logs/
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build
+dist/
+build/
+out/
+
+# Temporary files
+tmp/
+temp/
+
+# Documentation files (only keep README.md)
+*.md
+!README.md
+!DESIGN.md
+!SKILL.md
+
+# Local setup files
+LOCAL_SETUP_GUIDE.md
+READY_TO_TEST.md
+SETUP_GUIDE.md
+CHECKLIST.md

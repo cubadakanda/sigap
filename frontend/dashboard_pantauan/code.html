@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+
+<html class="light" lang="id"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary-container": "#57657a",
+                        "surface-container-high": "#e9e7ef",
+                        "inverse-surface": "#2f3036",
+                        "on-surface-variant": "#444651",
+                        "on-secondary": "#ffffff",
+                        "surface": "#faf8ff",
+                        "on-tertiary": "#ffffff",
+                        "outline-variant": "#c5c5d3",
+                        "outline": "#757682",
+                        "surface-tint": "#4059aa",
+                        "on-surface": "#1a1b21",
+                        "on-tertiary-fixed-variant": "#773205",
+                        "on-tertiary-fixed": "#341100",
+                        "on-error": "#ffffff",
+                        "primary-fixed-dim": "#b6c4ff",
+                        "on-primary-fixed": "#00164e",
+                        "surface-container-low": "#f4f3fa",
+                        "secondary-fixed": "#d5e3fc",
+                        "on-primary-fixed-variant": "#264191",
+                        "error-container": "#ffdad6",
+                        "inverse-primary": "#b6c4ff",
+                        "surface-dim": "#dad9e1",
+                        "secondary-container": "#d5e3fc",
+                        "primary-container": "#1e3a8a",
+                        "primary": "#00236f",
+                        "tertiary": "#4b1c00",
+                        "on-error-container": "#93000a",
+                        "error": "#ba1a1a",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-variant": "#e3e1e9",
+                        "inverse-on-surface": "#f1f0f7",
+                        "on-primary-container": "#90a8ff",
+                        "surface-container-highest": "#e3e1e9",
+                        "secondary-fixed-dim": "#b9c7df",
+                        "on-primary": "#ffffff",
+                        "background": "#faf8ff",
+                        "primary-fixed": "#dce1ff",
+                        "on-tertiary-container": "#f39461",
+                        "on-secondary-fixed": "#0d1c2e",
+                        "secondary": "#515f74",
+                        "surface-container": "#eeedf4",
+                        "on-background": "#1a1b21",
+                        "tertiary-fixed": "#ffdbcb",
+                        "on-secondary-fixed-variant": "#3a485b",
+                        "surface-bright": "#faf8ff",
+                        "tertiary-fixed-dim": "#ffb691",
+                        "tertiary-container": "#6e2c00",
+                        "sigap-blue": "#1e3a8a"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xl": "48px",
+                        "margin": "32px",
+                        "sm": "16px",
+                        "base": "4px",
+                        "xs": "8px",
+                        "lg": "32px",
+                        "gutter": "24px",
+                        "md": "24px"
+                    },
+                    "fontFamily": {
+                        "inter": ['"Inter"', 'sans-serif']
+                    },
+                    "fontSize": {
+                        "label-sm": ["12px", {"lineHeight": "1.2", "fontWeight": "500"}],
+                        "body-sm": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "h3": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                        "h1": ["36px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "h2": ["30px", {"lineHeight": "1.3", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "label-md": ["14px", {"lineHeight": "1.2", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>body {
+    font-family: "Inter", sans-serif
+    }
+.material-symbols-outlined {
+    font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24
+    }
+.bg-infrastructure {
+    background-image: linear-gradient(rgba(250, 248, 255, 0.85), rgba(250, 248, 255, 0.95)), url(https://lh3.googleusercontent.com/aida-public/AB6AXuAc141ewyj7T7hdr_JwG934dtN0TbfNh0V2O2k5_IjrJie1CC1jcedsVlU6-N0NrlPkyFUkpLjGFKSuKAqQWm9AEXM88fuMsPkGOXFTqGHgr9nANcUUDDKhk6VJP_XCZDwavnRX_X4xWlVcUIP__IhbMkWDks_mVmWoK-8V9VasDMAiKHfJ-zxUTKf5yG2eHfiIi9345Mw7Mb8f86IHGgvu3s_TJ01SN9GCRl-67__r1MWiVrsV81EH7HmvfaPDf-mQl0R73-cwef7I);
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed
+    }
+.glass-card {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.3)
+    }</style>
+</head>
+<body class="bg-infrastructure text-on-background antialiased min-h-screen">
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-8 h-16 bg-white/70 dark:bg-slate-900/70 backdrop-blur-md shadow-sm border-b border-white/20">
+<div class="text-2xl font-black tracking-tight text-sigap-blue dark:text-white">SIGAP</div>
+<nav class="hidden md:flex items-center gap-8">
+<a class="font-inter antialiased text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-sigap-blue dark:hover:text-blue-300 transition-colors duration-200" href="#">Beranda</a>
+<a class="font-inter antialiased text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-sigap-blue dark:hover:text-blue-300 transition-colors duration-200" href="#">Laporkan</a>
+<a class="font-inter antialiased text-sm font-medium text-sigap-blue dark:text-blue-400 border-b-2 border-sigap-blue dark:border-blue-400 pb-1" href="#">Dashboard</a>
+</nav>
+<button class="bg-sigap-blue text-on-primary px-5 py-2 rounded-lg font-label-md text-label-md hover:opacity-90 active:scale-95 transition-all">Login Petugas</button>
+</header>
+<main class="pt-24 pb-32 px-8 max-w-7xl mx-auto">
+<div class="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
+<div>
+<h1 class="font-inter font-bold text-h1 text-sigap-blue mb-2">Pantauan Real-Time SIGAP</h1>
+<p class="font-body-md text-body-md text-on-secondary-container">Monitoring gangguan infrastruktur publik dan jalan dari laporan warga secara langsung.</p>
+</div>
+<div class="flex flex-wrap gap-3">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
+<input class="pl-10 pr-4 py-2 bg-white/60 backdrop-blur-sm border border-white/40 rounded-xl focus:ring-2 focus:ring-sigap-blue focus:border-sigap-blue outline-none transition-all w-64 text-body-sm" placeholder="Cari laporan..." type="text"/>
+</div>
+<button class="flex items-center gap-2 px-4 py-2 bg-white/60 backdrop-blur-sm border border-white/40 rounded-xl hover:bg-white/80 transition-colors text-label-md font-label-md">
+<span class="material-symbols-outlined text-[20px]">filter_list</span>
+                Filter
+            </button>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
+<div class="glass-card rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all group">
+<div class="relative h-48 overflow-hidden bg-slate-200">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A detailed view of a large asphalt pothole on a busy urban street during a bright afternoon." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCVBHtq8v1hQlwkBppbHqLtq-Bbe3L1glqS8e4lSOPcxJSb50ZRvRILQz66iqm6Gl5eK4DMw9fLsnkCZIlUbwKN2xYc6jQP9a5xwVXYJWSkUjHDCMU3C5scmsC57wnmNWD6D3TzLg6l9mXPpYYEoxAZPy7Gm6acq7DN1gvY_SLxsGOO6W97SxqAEnNfyrDCTXbqcWH42OFY1HotGLSVi7w6qUDThNFg2OXQ9b6Sm8CZPranYlCC9HmEjvMEnIeMYbji4pvi3qZ0_lNi"/>
+<div class="absolute top-3 left-3 bg-white/80 backdrop-blur-sm px-2 py-1 rounded-md flex items-center gap-1.5 shadow-sm">
+<span class="text-[10px] font-bold text-slate-500 tracking-tighter uppercase">CloudFront CDN</span>
+</div>
+<div class="absolute top-3 right-3">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-500/20 text-blue-700 backdrop-blur-md rounded-full font-label-sm text-label-sm border border-blue-500/20">
+<span class="material-symbols-outlined text-[14px]">schedule</span>
+                        Pending
+                    </span>
+</div>
+</div>
+<div class="p-5">
+<div class="flex items-center gap-2 mb-3">
+<span class="material-symbols-outlined text-error text-[20px]">warning</span>
+<h3 class="font-label-md text-label-md text-on-surface">Jalan Berlubang Parah</h3>
+</div>
+<div class="space-y-2 mb-4">
+<div class="flex items-center gap-2 text-on-secondary-container">
+<span class="material-symbols-outlined text-[18px]">location_on</span>
+<span class="text-body-sm font-body-sm">Jl. Gatot Subroto No. 12, Jakarta</span>
+</div>
+<div class="flex items-center gap-2 text-on-secondary-container">
+<span class="material-symbols-outlined text-[18px]">calendar_today</span>
+<span class="text-body-sm font-body-sm">Hari ini, 10:45 WIB</span>
+</div>
+</div>
+<div class="pt-4 border-t border-white/30 flex justify-between items-center">
+<span class="text-[10px] text-outline font-medium uppercase tracking-widest">ID: #REP-8821</span>
+<button class="text-sigap-blue font-label-md text-label-md hover:underline">Lihat Detail</button>
+</div>
+</div>
+</div>
+<div class="glass-card rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all group">
+<div class="relative h-48 overflow-hidden bg-slate-200">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Close-up of a broken yellow street lamp pole leaning over a sidewalk with electrical wires exposed." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCKpdyiUY4qdZPOA133FmQDIuS5qSD99ZslGF2YYQzH8j--vG8wtHk914iQcpyBLB56gaRaA1EAlV9S2SHLveAXfYJ4RGPQ8ihoFIxjIB9Ftvq-9iT6VbL3jw1x34RX_xD-I-U_VHfthR2ruxW-2oYotDLSzhYn9zQ0nNPO4sbGia4TBkDXSsMST86wMESjf5o1921A8To_eFXADRtp1S_9ifcln6kAwwcN9pECO6rxHNqdy4XNCC_a2ut7DGZpit74bs4oPrtei42c"/>
+<div class="absolute top-3 left-3 bg-white/80 backdrop-blur-sm px-2 py-1 rounded-md flex items-center gap-1.5 shadow-sm">
+<span class="text-[10px] font-bold text-slate-500 tracking-tighter uppercase">CloudFront CDN</span>
+</div>
+<div class="absolute top-3 right-3">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-500/20 text-amber-700 backdrop-blur-md rounded-full font-label-sm text-label-sm border border-amber-500/20">
+<span class="material-symbols-outlined text-[14px]">autorenew</span>
+                        Diproses
+                    </span>
+</div>
+</div>
+<div class="p-5">
+<div class="flex items-center gap-2 mb-3">
+<span class="material-symbols-outlined text-sigap-blue text-[20px]">lightbulb</span>
+<h3 class="font-label-md text-label-md text-on-surface">Lampu Jalan Padam</h3>
+</div>
+<div class="space-y-2 mb-4">
+<div class="flex items-center gap-2 text-on-secondary-container">
+<span class="material-symbols-outlined text-[18px]">location_on</span>
+<span class="text-body-sm font-body-sm">Kawasan Industri Pulogadung</span>
+</div>
+<div class="flex items-center gap-2 text-on-secondary-container">
+<span class="material-symbols-outlined text-[18px]">calendar_today</span>
+<span class="text-body-sm font-body-sm">Kemarin, 19:20 WIB</span>
+</div>
+</div>
+<div class="pt-4 border-t border-white/30 flex justify-between items-center">
+<span class="text-[10px] text-outline font-medium uppercase tracking-widest">ID: #REP-8790</span>
+<button class="text-sigap-blue font-label-md text-label-md hover:underline">Lihat Detail</button>
+</div>
+</div>
+</div>
+<div class="glass-card rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all group">
+<div class="relative h-48 overflow-hidden bg-slate-200">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A clean urban drainage grate that has been cleared of debris and trash." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCQuWvvh9NcnbTXyn-Xy2EtRykzZzKAY2piIvMIbhLDbdYLb_dA99YTcMAynh6xfkX1vv81xKgoEgTDpZ5E0Mt6sfl3bOSS4i-e7_6mqKXq8xQpIFv_7BqkuWjvesCJXMSfmR0eoc-2x_QpgxAZ7UvSl2JXkLy7FE-5O3qRf_1__ySLdv2IfuprmYqDvcCnpGuAqW4NuEO1WLtbfTOTNn1TFjgKKAkBKHts-41u54xM3i8U5jMyeOSc73WxlshV1S0gyAs_MbtPBeYz"/>
+<div class="absolute top-3 left-3 bg-white/80 backdrop-blur-sm px-2 py-1 rounded-md flex items-center gap-1.5 shadow-sm">
+<span class="text-[10px] font-bold text-slate-500 tracking-tighter uppercase">CloudFront CDN</span>
+</div>
+<div class="absolute top-3 right-3">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-500/20 text-emerald-700 backdrop-blur-md rounded-full font-label-sm text-label-sm border border-emerald-500/20">
+<span class="material-symbols-outlined text-[14px]">check_circle</span>
+                        Selesai
+                    </span>
+</div>
+</div>
+<div class="p-5">
+<div class="flex items-center gap-2 mb-3">
+<span class="material-symbols-outlined text-emerald-600 text-[20px]">water_drop</span>
+<h3 class="font-label-md text-label-md text-on-surface">Saluran Air Tersumbat</h3>
+</div>
+<div class="space-y-2 mb-4">
+<div class="flex items-center gap-2 text-on-secondary-container">
+<span class="material-symbols-outlined text-[18px]">location_on</span>
+<span class="text-body-sm font-body-sm">Perumahan Menteng Pratama</span>
+</div>
+<div class="flex items-center gap-2 text-on-secondary-container">
+<span class="material-symbols-outlined text-[18px]">calendar_today</span>
+<span class="text-body-sm font-body-sm">2 Okt 2023, 08:15 WIB</span>
+</div>
+</div>
+<div class="pt-4 border-t border-white/30 flex justify-between items-center">
+<span class="text-[10px] text-outline font-medium uppercase tracking-widest">ID: #REP-8755</span>
+<button class="text-sigap-blue font-label-md text-label-md hover:underline">Lihat Detail</button>
+</div>
+</div>
+</div>
+<div class="glass-card rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all group">
+<div class="relative h-48 overflow-hidden bg-slate-200">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A close-up of a damaged sidewalk with cracked concrete tiles and uneven surfaces." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAt-olRtsmDVwMlOa5sztPBr9tbKOyTidbwFIGYlmCFL_NXb1FHlR2gao5M8RhdJAEkh-9mpWi_jjgB-5m-CfmJG3IxMuDW7Ga_dH6dWPimtAxCsxJnFLDYg7hB5WwW0pex8NjUh5-YRcpqOHtvqfMqi9Tq_txePzflI4tvqWnDT19ayM-kyuGJX0UbWXQbQld2iw-B4dhgxjB6nXFYH7lgsU8c0rGtIENQldcrDuOxmmtF8X62BGAfcIfIPnqEYZi_yaL8imoH7wiR"/>
+<div class="absolute top-3 left-3 bg-white/80 backdrop-blur-sm px-2 py-1 rounded-md flex items-center gap-1.5 shadow-sm">
+<span class="text-[10px] font-bold text-slate-500 tracking-tighter uppercase">CloudFront CDN</span>
+</div>
+<div class="absolute top-3 right-3">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-500/20 text-blue-700 backdrop-blur-md rounded-full font-label-sm text-label-sm border border-blue-500/20">
+<span class="material-symbols-outlined text-[14px]">schedule</span>
+                        Pending
+                    </span>
+</div>
+</div>
+<div class="p-5">
+<div class="flex items-center gap-2 mb-3">
+<span class="material-symbols-outlined text-error text-[20px]">directions_walk</span>
+<h3 class="font-label-md text-label-md text-on-surface">Trotoar Rusak Berat</h3>
+</div>
+<div class="space-y-2 mb-4">
+<div class="flex items-center gap-2 text-on-secondary-container">
+<span class="material-symbols-outlined text-[18px]">location_on</span>
+<span class="text-body-sm font-body-sm">Jl. Sudirman (Dekat MRT)</span>
+</div>
+<div class="flex items-center gap-2 text-on-secondary-container">
+<span class="material-symbols-outlined text-[18px]">calendar_today</span>
+<span class="text-body-sm font-body-sm">Hari ini, 14:30 WIB</span>
+</div>
+</div>
+<div class="pt-4 border-t border-white/30 flex justify-between items-center">
+<span class="text-[10px] text-outline font-medium uppercase tracking-widest">ID: #REP-8830</span>
+<button class="text-sigap-blue font-label-md text-label-md hover:underline">Lihat Detail</button>
+</div>
+</div>
+</div>
+<div class="glass-card rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all group">
+<div class="relative h-48 overflow-hidden bg-slate-200">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A wide-angle view of a construction site with orange safety cones and barriers surrounding a road excavation." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAGGITMoyxQcG26yxRgV_79NcMRLgIl8Imio9GPLHL6K_Q6JWrLzHr0psRdz1WqPJ4HeP3zNs4O78p41vPbCAVtlRzbHpdVxPRjfFn6AmVASpRQw5CBzyecXUvWawDxcGFHiOpiD7sWvEtWpdJDVQIODK3mc1dNyzoATrClqUxIPSM17_mdPRwCoDVgNBU9kwO-N7jB8uUhz_cKgpWWn1lLbn8S7j_BnDZ9AB8MqhqD0SudPanxSAETbKUVV58uRuHIfKKG889AGkc5"/>
+<div class="absolute top-3 left-3 bg-white/80 backdrop-blur-sm px-2 py-1 rounded-md flex items-center gap-1.5 shadow-sm">
+<span class="text-[10px] font-bold text-slate-500 tracking-tighter uppercase">CloudFront CDN</span>
+</div>
+<div class="absolute top-3 right-3">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-500/20 text-amber-700 backdrop-blur-md rounded-full font-label-sm text-label-sm border border-amber-500/20">
+<span class="material-symbols-outlined text-[14px]">autorenew</span>
+                        Diproses
+                    </span>
+</div>
+</div>
+<div class="p-5">
+<div class="flex items-center gap-2 mb-3">
+<span class="material-symbols-outlined text-sigap-blue text-[20px]">construction</span>
+<h3 class="font-label-md text-label-md text-on-surface">Pekerjaan Galian Pipa</h3>
+</div>
+<div class="space-y-2 mb-4">
+<div class="flex items-center gap-2 text-on-secondary-container">
+<span class="material-symbols-outlined text-[18px]">location_on</span>
+<span class="text-body-sm font-body-sm">Jl. Rasuna Said, Kuningan</span>
+</div>
+<div class="flex items-center gap-2 text-on-secondary-container">
+<span class="material-symbols-outlined text-[18px]">calendar_today</span>
+<span class="text-body-sm font-body-sm">Hari ini, 09:00 WIB</span>
+</div>
+</div>
+<div class="pt-4 border-t border-white/30 flex justify-between items-center">
+<span class="text-[10px] text-outline font-medium uppercase tracking-widest">ID: #REP-8815</span>
+<button class="text-sigap-blue font-label-md text-label-md hover:underline">Lihat Detail</button>
+</div>
+</div>
+</div>
+<div class="bg-white/40 backdrop-blur-md border-2 border-dashed border-white/60 rounded-xl flex flex-col items-center justify-center p-8 text-center opacity-70 hover:opacity-100 transition-all cursor-pointer">
+<div class="w-16 h-16 rounded-full bg-white/50 flex items-center justify-center mb-4 shadow-sm">
+<span class="material-symbols-outlined text-sigap-blue text-[32px]">add_a_photo</span>
+</div>
+<h3 class="font-h3 text-h3 text-sigap-blue mb-2">Tambah Laporan</h3>
+<p class="font-body-sm text-body-sm text-on-secondary-container">Gunakan fitur kamera untuk melaporkan gangguan baru secara langsung.</p>
+<button class="mt-6 px-6 py-2 bg-sigap-blue text-white rounded-lg font-label-md text-label-md shadow-md hover:shadow-lg transition-shadow">Mulai Kamera</button>
+</div>
+</div>
+</main>
+<nav class="fixed bottom-0 w-full z-50 flex justify-around items-center px-4 py-3 md:hidden bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg border-t border-white/20 shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
+<div class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-500">
+<span class="material-symbols-outlined">home</span>
+<span class="font-inter text-[11px] font-semibold uppercase tracking-wider mt-1">Beranda</span>
+</div>
+<div class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-500">
+<span class="material-symbols-outlined">campaign</span>
+<span class="font-inter text-[11px] font-semibold uppercase tracking-wider mt-1">Laporkan</span>
+</div>
+<div class="flex flex-col items-center justify-center text-sigap-blue dark:text-blue-400 bg-sigap-blue/10 dark:bg-blue-900/30 rounded-xl px-4 py-1">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+<span class="font-inter text-[11px] font-semibold uppercase tracking-wider mt-1">Dashboard</span>
+</div>
+</nav>
+<footer class="w-full py-12 px-8 flex flex-col md:flex-row justify-between items-center gap-6 bg-white/60 backdrop-blur-md border-t border-white/30">
+<div class="flex flex-col gap-2 items-center md:items-start">
+<div class="text-lg font-bold text-sigap-blue dark:text-white">SIGAP</div>
+<p class="font-inter text-sm text-slate-600 dark:text-slate-400 text-center md:text-left max-w-sm">
+            © 2024 SIGAP - Sistem Informasi Gangguan Publik &amp; Jalan. Melayani masyarakat untuk infrastruktur yang lebih baik.
+        </p>
+</div>
+<div class="flex gap-8">
+<a class="font-inter text-sm text-slate-600 dark:text-slate-400 hover:text-sigap-blue hover:underline transition-all opacity-80 hover:opacity-100" href="#">Tentang Kami</a>
+<a class="font-inter text-sm text-slate-600 dark:text-slate-400 hover:text-sigap-blue hover:underline transition-all opacity-80 hover:opacity-100" href="#">Kebijakan Privasi</a>
+<a class="font-inter text-sm text-slate-600 dark:text-slate-400 hover:text-sigap-blue hover:underline transition-all opacity-80 hover:opacity-100" href="#">Bantuan</a>
+<a class="font-inter text-sm text-slate-600 dark:text-slate-400 hover:text-sigap-blue hover:underline transition-all opacity-80 hover:opacity-100" href="#">Kontak</a>
+</div>
+</footer>
+</body></html>

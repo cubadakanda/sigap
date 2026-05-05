@@ -1,0 +1,58 @@
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+:root {
+  --sigap-blue: #1e3a8a;
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.glass {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.glass-nav {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.bg-pattern {
+  background-image: radial-gradient(circle at 2px 2px, rgba(30, 58, 138, 0.05) 1px, transparent 0);
+  background-size: 24px 24px;
+}
+
+.bg-urban-pattern {
+  background-image: linear-gradient(rgba(248, 249, 255, 0.85), rgba(248, 249, 255, 0.95)), url(https://lh3.googleusercontent.com/aida-public/AB6AXuDi5dAi6DGSRZavnfNprW6coH_Bwz0mbU__K3h61qSZ_elEayrj3JkqGIPGnorBdGk9Ts8D21AQ6Koz8OTW1MjvQG6Utw76LPsOPXmYPaWc_Pj1BzgyFOfTHb-wIa90lZhY4KveN2ajGp4k8P5Kij4EOw-P3k-m4xl0OZWd4jXn-bLPLImfhPI8ciYuHYYEmlYZqDxA4QeHzewQw5CSUa_PhxY82KjWHx4rsNGjAlcVcY5eQqg3xlGTseQjmGOVBW4hDE90Gz_nvhjr);
+  background-size: cover;
+  background-position: center;
+}
+
+.bg-infrastructure {
+  background-image: linear-gradient(135deg, rgba(250, 248, 255, 0.92) 0%, rgba(240, 244, 255, 0.88) 100%), url(https://lh3.googleusercontent.com/aida-public/AB6AXuBdMrJiDMFAUwHv9o-nPQDW-y13vv5H1tM6fBd_NCmJlFzokzheINdE21fZRolkr9t3ptLkjORkDUF-xOaC-4WVAoeSmzhVtQGJz7Zqbx7mIsLJGa3RcgWBtUWeeTmBVLvxymkdLl7O7HCnnt_925sSTT0UQ11072NtXDiTWgtbQnDGjEhTVTIHU73E6CsBnAaevnwFOdLGVHXAmb4bPb7tcvx3FOasmbQQpuJdNnStiantrclPu7CDzObHC3UuafKtxPBDlYfjljjI);
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+
+.btn-gradient {
+  background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+}
+
+.text-shadow-sm {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-size: 24px;
+  display: inline-block;
+}
