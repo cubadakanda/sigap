@@ -9,7 +9,7 @@ env:
   AWS_REGION: ap-southeast-1
   ECS_CLUSTER: sigap-cluster
   # Sesuaikan nama service di bawah jika berbeda dengan di AWS ECS kamu
-  BACKEND_SERVICE: sigap-backend-service 
+  BACKEND_SERVICE: sigap-backend-final
   FRONTEND_SERVICE: sigap-frontend-service
   ECR_REPO_BACKEND: sigap-backend
   ECR_REPO_FRONTEND: sigap-frontend
