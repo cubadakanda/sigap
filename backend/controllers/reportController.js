@@ -235,3 +235,37 @@ exports.getReportsByStatus = async (req, res) => {
     });
   }
 };
+
+/**
+ * DELETE /api/reports/:id
+ * Delete single report by ID
+ */
+exports.deleteReport = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const report = await Report.findByPk(id);
+
+    if (!report) {
+      return res.status(404).json({
+        success: false,
+        message: 'Report not found',
+      });
+    }
+
+    // Menghapus data dari database
+    await report.destroy();
+
+    res.status(200).json({
+      success: true,
+      message: 'Report deleted successfully',
+    });
+  } catch (error) {
+    console.error('Error deleting report:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error deleting report',
+      error: error.message,
+    });
+  }
+};

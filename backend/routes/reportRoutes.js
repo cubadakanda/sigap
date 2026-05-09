@@ -34,4 +34,6 @@ router.get('/status/:status', reportController.getReportsByStatus);
  */
 router.patch('/:id/status', reportController.updateReportStatus);
 
+router.delete('/:id', reportController.deleteReport);
+
 module.exports = router;
