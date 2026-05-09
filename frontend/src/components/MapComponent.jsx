@@ -49,7 +49,7 @@ const createMarkerIcon = (color) => {
   })
 }
 
-export default function MapComponent({ reports = [], onMarkerClick = null, onMapClick = null, center = [-6.2088, 106.8456], zoom = 12 }) {
+export default function MapComponent({ reports = [], onMarkerClick = null, onMapClick = null, center = [-6.9147, 107.6098], zoom = 10 }) {
   const mapRef = useRef(null)
   const mapInstanceRef = useRef(null)
   const markersRef = useRef([])
@@ -101,10 +101,30 @@ export default function MapComponent({ reports = [], onMarkerClick = null, onMap
 
       // Add new markers
       reports.forEach(report => {
-        // Fallback untuk membaca data DB (antisipasi nama kolom)
-        const lat = parseFloat(report.latitude || report.lat) || -6.2088
-        const lng = parseFloat(report.longitude || report.lng) || 106.8456
         
+        // --- LOGIKA PINTAR BACA KOORDINAT ---
+        let lat = -6.2088; // Default ke Jakarta jika semuanya gagal
+        let lng = 106.8456;
+
+        if (report.latitude && report.longitude) {
+          lat = parseFloat(report.latitude);
+          lng = parseFloat(report.longitude);
+        } else if (report.lokasi && report.lokasi.includes(',')) {
+          // Hapus teks "Koordinat:" dan ekstrak murni angkanya saja
+          const cleanLoc = report.lokasi.replace(/Koordinat:\s*/gi, '');
+          const parts = cleanLoc.split(',');
+          
+          if (parts.length >= 2) {
+            const pLat = parseFloat(parts[0].trim());
+            const pLng = parseFloat(parts[1].trim());
+            if (!isNaN(pLat) && !isNaN(pLng)) {
+              lat = pLat;
+              lng = pLng;
+            }
+          }
+        }
+        // ------------------------------------
+
         const kategori = report.jenis_gangguan || report.kategori || 'Laporan Masuk'
         const pelapor = report.pelapor_nama || report.nama || 'Warga'
         const imageUrl = report.image_url || report.foto
