@@ -12,12 +12,13 @@ L.Icon.Default.mergeOptions({
 
 // Helper function to get marker color based on status
 const getMarkerColor = (status) => {
-  switch (status) {
-    case 'Pending':
+  const s = (status || '').toLowerCase()
+  switch (s) {
+    case 'pending':
       return '#FBBF24' // amber/yellow
-    case 'Diproses':
+    case 'diproses':
       return '#3B82F6' // blue
-    case 'Selesai':
+    case 'selesai':
       return '#10B981' // green
     default:
       return '#6B7280' // gray
@@ -89,7 +90,7 @@ export default function MapComponent({ reports = [], onMarkerClick = null, onMap
         markersRef.current = []
       }
     }
-  }, [])
+  }, [center, zoom])
 
   useEffect(() => {
     // Update markers when reports change
@@ -100,11 +101,17 @@ export default function MapComponent({ reports = [], onMarkerClick = null, onMap
 
       // Add new markers
       reports.forEach(report => {
-        // Use default Jakarta coordinates if no lat/lng provided
-        const lat = report.latitude || -6.2088
-        const lng = report.longitude || 106.8456
+        // Fallback untuk membaca data DB (antisipasi nama kolom)
+        const lat = parseFloat(report.latitude || report.lat) || -6.2088
+        const lng = parseFloat(report.longitude || report.lng) || 106.8456
+        
+        const kategori = report.jenis_gangguan || report.kategori || 'Laporan Masuk'
+        const pelapor = report.pelapor_nama || report.nama || 'Warga'
+        const imageUrl = report.image_url || report.foto
+        const deskripsi = report.deskripsi || report.lokasi || 'Tidak ada deskripsi'
+        const statusReport = report.status || 'Pending'
 
-        const color = getMarkerColor(report.status)
+        const color = getMarkerColor(statusReport)
         const marker = L.marker([lat, lng], {
           icon: createMarkerIcon(color),
         })
@@ -113,27 +120,24 @@ export default function MapComponent({ reports = [], onMarkerClick = null, onMap
         const popupContent = `
           <div style="width: 250px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
             <div style="margin-bottom: 8px;">
-              <span style="background-color: ${color}; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;">
-                ${report.status}
+              <span style="background-color: ${color}; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; text-transform: uppercase;">
+                ${statusReport}
               </span>
             </div>
             <div style="margin-bottom: 6px;">
-              <strong>${report.jenis_gangguan}</strong>
+              <strong>${kategori}</strong>
             </div>
             <div style="margin-bottom: 6px; font-size: 13px; color: #666;">
-              <strong>Pelapor:</strong> ${report.pelapor_nama}
+              <strong>Pelapor:</strong> ${pelapor}
             </div>
             <div style="margin-bottom: 6px; font-size: 13px; color: #666;">
-              <strong>Lokasi:</strong> ${report.lokasi}
-            </div>
-            <div style="margin-bottom: 6px; font-size: 13px; color: #666;">
-              <strong>Deskripsi:</strong> ${report.deskripsi || 'Tidak ada deskripsi'}
+              <strong>Deskripsi:</strong> ${deskripsi}
             </div>
             <div style="margin-bottom: 6px; font-size: 12px; color: #999;">
-              <strong>ID:</strong> ${report.id}
+              <strong>ID:</strong> #${report.id}
             </div>
-            ${report.image_url ? `<div style="margin-top: 8px;">
-              <img src="${report.image_url}" style="width: 100%; border-radius: 4px; max-height: 150px; object-fit: cover;" alt="Report" />
+            ${imageUrl ? `<div style="margin-top: 8px;">
+              <img src="${imageUrl}" style="width: 100%; border-radius: 4px; max-height: 150px; object-fit: cover; border: 1px solid #eee;" alt="Bukti Lapangan" />
             </div>` : ''}
           </div>
         `
@@ -163,6 +167,7 @@ export default function MapComponent({ reports = [], onMarkerClick = null, onMap
         width: '100%',
         height: '100%',
         borderRadius: '8px',
+        zIndex: 0 // Mencegah peta menutupi modal/navbar
       }}
       className="map-container"
     />

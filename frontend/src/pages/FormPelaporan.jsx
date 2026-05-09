@@ -71,17 +71,22 @@ export default function FormPelaporan() {
     setLoading(true)
 
     try {
-      const data = new FormData()
-      data.append('pelapor_nama', formData.pelapor_nama)
-      data.append('jenis_gangguan', formData.jenis_gangguan)
-      data.append('lokasi', formData.lokasi)
-      data.append('deskripsi', formData.deskripsi)
+      // Kita bungkus semua data ke dalam kotak khas untuk dihantar
+      const formDataToSend = new FormData()
+      formDataToSend.append('pelapor_nama', formData.pelapor_nama)
+      formDataToSend.append('jenis_gangguan', formData.jenis_gangguan)
+      formDataToSend.append('lokasi', formData.lokasi)
+      formDataToSend.append('deskripsi', formData.deskripsi)
+      
+      // Pastikan label ini adalah 'image' (sama dengan upload.single di Backend)
       if (formData.image) {
-        data.append('image', formData.image)
+        formDataToSend.append('image', formData.image)
       }
 
-      await createReport(data)
+      await createReport(formDataToSend)
       setSuccess(true)
+      
+      // Kosongkan form selepas berjaya
       setFormData({
         pelapor_nama: '',
         jenis_gangguan: 'Jalan Rusak',
@@ -98,7 +103,7 @@ export default function FormPelaporan() {
       }, 2000)
     } catch (error) {
       console.error('Error:', error)
-      alert('Gagal mengirim laporan')
+      alert('Gagal menghantar laporan')
     } finally {
       setLoading(false)
     }

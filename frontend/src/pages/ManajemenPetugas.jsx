@@ -1,49 +1,7 @@
-import { useState, useMemo } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import MapComponent from '../components/MapComponent'
-
-const dummyReports = [
-  {
-    id: 'SIG-00821',
-    pelapor_nama: 'Andi Wijaya',
-    jenis_gangguan: 'Lubang Jalan Dalam',
-    lokasi: 'Jl. Sudirman KM 4.2',
-    status: 'Pending',
-    waktu: '12 Menit Lalu',
-    latitude: -6.2175,
-    longitude: 106.8305
-  },
-  {
-    id: 'SIG-00819',
-    pelapor_nama: 'Rina Safitri',
-    jenis_gangguan: 'Tiang Listrik Miring',
-    lokasi: 'Kec. Menteng Dalam',
-    status: 'Diproses',
-    waktu: '2 Jam Lalu',
-    latitude: -6.2412,
-    longitude: 106.8321
-  },
-  {
-    id: 'SIG-00815',
-    pelapor_nama: 'Budi Darsono',
-    jenis_gangguan: 'Sampah Menumpuk',
-    lokasi: 'Pasar Minggu',
-    status: 'Selesai',
-    waktu: '5 Jam Lalu',
-    latitude: -6.2842,
-    longitude: 106.8358
-  },
-  {
-    id: 'SIG-00825',
-    pelapor_nama: 'Maya Lestari',
-    jenis_gangguan: 'Pohon Tumbang',
-    lokasi: 'Jl. Gatot Subroto',
-    status: 'Pending',
-    waktu: 'Baru Saja',
-    latitude: -6.2251,
-    longitude: 106.8287
-  }
-]
+import { getReports, updateReportStatus, deleteReport } from '../services/api'
 
 const emptyReport = {
   id: '',
@@ -56,7 +14,7 @@ const emptyReport = {
 
 export default function ManajemenPetugas() {
   const navigate = useNavigate()
-  const [reports, setReports] = useState(dummyReports)
+  const [reports, setReports] = useState([])
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState('Semua')
   const [currentPage, setCurrentPage] = useState(1)
@@ -64,13 +22,44 @@ export default function ManajemenPetugas() {
   const [modalMode, setModalMode] = useState('create')
   const [activeReport, setActiveReport] = useState(emptyReport)
 
+  // 1. KUNCI GEMBOK: Cek apakah user sudah login sebagai petugas
+  useEffect(() => {
+    const isOfficer = localStorage.getItem('isOfficer')
+    if (!isOfficer) {
+      navigate('/login') // Tendang ke halaman login jika bukan petugas
+    }
+  }, [navigate])
+
+  // 2. PANGGIL DATA ASLI DARI DATABASE
+  useEffect(() => {
+    const fetchRealData = async () => {
+      try {
+        const response = await getReports()
+        const data = Array.isArray(response) ? response : response?.data || []
+        setReports(data)
+      } catch (error) {
+        console.error("Gagal mengambil data dari database:", error)
+      }
+    }
+    fetchRealData()
+  }, [])
+
+  // Fungsi Logout
+  const handleLogout = () => {
+    localStorage.removeItem('isOfficer')
+    navigate('/login')
+  }
+
   const filteredReports = useMemo(() => {
     const query = searchQuery.toLowerCase()
     return reports.filter((report) => {
-      const matchSearch = report.pelapor_nama.toLowerCase().includes(query) ||
-        report.lokasi.toLowerCase().includes(query) ||
-        report.jenis_gangguan.toLowerCase().includes(query) ||
-        report.id.toLowerCase().includes(query)
+      // Gunakan fallback penamaan properti (karena nama kolom di DB bisa berbeda)
+      const nama = (report.pelapor_nama || report.nama || '').toLowerCase()
+      const lokasi = (report.lokasi || '').toLowerCase()
+      const kategori = (report.jenis_gangguan || report.kategori || '').toLowerCase()
+      const id = (report.id ? String(report.id) : '').toLowerCase()
+
+      const matchSearch = nama.includes(query) || lokasi.includes(query) || kategori.includes(query) || id.includes(query)
       const matchStatus = statusFilter === 'Semua' || report.status === statusFilter
       return matchSearch && matchStatus
     })
@@ -85,9 +74,9 @@ export default function ManajemenPetugas() {
 
   const stats = {
     total: reports.length,
-    menunggu: reports.filter(r => r.status === 'Pending').length,
-    diproses: reports.filter(r => r.status === 'Diproses').length,
-    selesai: reports.filter(r => r.status === 'Selesai').length
+    menunggu: reports.filter(r => r.status === 'Pending' || r.status === 'pending').length,
+    diproses: reports.filter(r => r.status === 'Diproses' || r.status === 'diproses').length,
+    selesai: reports.filter(r => r.status === 'Selesai' || r.status === 'selesai').length
   }
 
   const openModal = (mode, report) => {
@@ -101,33 +90,52 @@ export default function ManajemenPetugas() {
     setActiveReport(emptyReport)
   }
 
-  const handleSave = () => {
-    if (modalMode === 'create') {
-      const newReport = {
-        ...activeReport,
-        id: activeReport.id || `SIG-${Math.floor(10000 + Math.random() * 90000)}`
+  // Catatan: Fungsi Save & Delete ini saat ini hanya mengubah tampilan. 
+  // Untuk benar-benar mengubah/menghapus di database, kamu perlu memanggil fungsi API (contoh: updateReportStatus)
+  const handleSave = async () => {
+    if (modalMode === 'edit') {
+      try {
+        // 1. Tembak data ke API/Database AWS
+        await updateReportStatus(activeReport.id, activeReport.status)
+        
+        // 2. Update tampilan di layar agar langsung berubah tanpa loading
+        setReports((prev) => prev.map((item) => (item.id === activeReport.id ? activeReport : item)))
+        
+        alert("Status berhasil diperbarui!")
+      } catch (error) {
+        console.error("Gagal update status:", error)
+        alert("Gagal menyimpan status ke database AWS. Coba lagi.")
       }
-      setReports((prev) => [newReport, ...prev])
-    } else if (modalMode === 'edit') {
-      setReports((prev) => prev.map((item) => (item.id === activeReport.id ? activeReport : item)))
     }
     closeModal()
   }
 
-  const handleDelete = () => {
-    setReports((prev) => prev.filter((item) => item.id !== activeReport.id))
+  const handleDelete = async () => {
+    try {
+      // Beritahu Backend AWS untuk padam data ini
+      await deleteReport(activeReport.id)
+      
+      // Padam dari skrin
+      setReports((prev) => prev.filter((item) => item.id !== activeReport.id))
+      alert("Laporan berjaya dipadam!")
+    } catch (error) {
+      console.error("Gagal memadam laporan:", error)
+      alert("Gagal memadam laporan di pangkalan data.")
+    }
     closeModal()
   }
 
   const getStatusBadge = (status) => {
-    if (status === 'Pending') return 'bg-amber-400/20 text-amber-700 border-amber-400/30'
-    if (status === 'Diproses') return 'bg-blue-400/20 text-blue-700 border-blue-400/30'
+    const s = (status || '').toLowerCase()
+    if (s === 'pending') return 'bg-amber-400/20 text-amber-700 border-amber-400/30'
+    if (s === 'diproses') return 'bg-blue-400/20 text-blue-700 border-blue-400/30'
     return 'bg-emerald-400/20 text-emerald-700 border-emerald-400/30'
   }
 
   const getStatusIcon = (status) => {
-    if (status === 'Pending') return 'schedule'
-    if (status === 'Diproses') return 'refresh'
+    const s = (status || '').toLowerCase()
+    if (s === 'pending') return 'schedule'
+    if (s === 'diproses') return 'refresh'
     return 'verified'
   }
 
@@ -143,9 +151,9 @@ export default function ManajemenPetugas() {
         <div className="flex items-center gap-4">
           <div className="flex flex-col items-end mr-2">
             <span className="text-[10px] uppercase tracking-widest font-bold text-primary px-2 py-0.5 bg-primary-fixed/50 rounded">Officer View</span>
-            <span className="text-[12px] font-medium text-on-surface-variant">Bripda Pratama</span>
+            <span className="text-[12px] font-medium text-on-surface-variant">Petugas Aktif</span>
           </div>
-          <button onClick={() => navigate('/login')} className="bg-white text-sigap-blue border border-sigap-blue/30 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-sigap-blue hover:text-white active:scale-95 transition-all shadow-lg shadow-sigap-blue/10">
+          <button onClick={handleLogout} className="bg-white text-sigap-blue border border-sigap-blue/30 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-sigap-blue hover:text-white active:scale-95 transition-all shadow-lg shadow-sigap-blue/10">
             Logout
           </button>
         </div>
@@ -156,12 +164,6 @@ export default function ManajemenPetugas() {
           <div>
             <h1 className="text-4xl font-bold text-sigap-blue mb-2">Manajemen Gangguan</h1>
             <p className="text-lg text-on-surface-variant">Antrean laporan masuk yang memerlukan tindakan segera.</p>
-          </div>
-          <div className="flex gap-3">
-            <button className="flex items-center gap-2 glass px-4 py-2 rounded-xl text-sm font-medium hover:bg-white/80 transition-colors" onClick={() => openModal('create')}>
-              <span className="material-symbols-outlined text-[18px]">add</span>
-              Tambah Laporan
-            </button>
           </div>
         </div>
 
@@ -183,7 +185,7 @@ export default function ManajemenPetugas() {
           </div>
           <div className="glass p-6 rounded-2xl flex flex-col gap-2 border-l-4 border-l-emerald-500/50 group hover:translate-y-[-4px] transition-transform duration-300">
             <span className="material-symbols-outlined text-emerald-500 text-3xl">task_alt</span>
-            <span className="text-[11px] uppercase text-on-surface-variant font-bold tracking-wider">Selesai (24j)</span>
+            <span className="text-[11px] uppercase text-on-surface-variant font-bold tracking-wider">Selesai</span>
             <span className="text-3xl font-bold text-on-surface">{stats.selesai}</span>
           </div>
         </div>
@@ -215,6 +217,7 @@ export default function ManajemenPetugas() {
             <span className="text-xs text-on-surface-variant">{filteredReports.length} laporan tampil</span>
           </div>
           <div className="h-[520px]">
+            {/* INI AKAN MENGIRIM DATA ASLI KE PETA */}
             <MapComponent reports={filteredReports} />
           </div>
         </div>
@@ -226,7 +229,7 @@ export default function ManajemenPetugas() {
               <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]">search</span>
               <input
                 className="pl-10 pr-4 py-2 bg-white/50 border border-white/40 rounded-full text-sm w-64 focus:ring-2 focus:ring-sigap-blue focus:bg-white focus:border-transparent transition-all"
-                placeholder="Cari ID Laporan atau Lokasi..."
+                placeholder="Cari Laporan..."
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -240,16 +243,15 @@ export default function ManajemenPetugas() {
                   <th className="px-6 py-4 text-[11px] font-bold text-on-surface-variant uppercase tracking-wider">Pelapor / ID</th>
                   <th className="px-6 py-4 text-[11px] font-bold text-on-surface-variant uppercase tracking-wider">Kategori & Lokasi</th>
                   <th className="px-6 py-4 text-[11px] font-bold text-on-surface-variant uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-4 text-[11px] font-bold text-on-surface-variant uppercase tracking-wider">Waktu</th>
                   <th className="px-6 py-4 text-[11px] font-bold text-on-surface-variant uppercase tracking-wider text-right">Aksi Manajemen</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/20">
-                {paginatedReports.map((report) => (
+                {paginatedReports.length > 0 ? paginatedReports.map((report) => (
                   <tr key={report.id} className="hover:bg-white/40 transition-colors">
                     <td className="px-6 py-5">
                       <div className="flex flex-col">
-                        <span className="font-bold text-on-surface">{report.pelapor_nama}</span>
+                        <span className="font-bold text-on-surface">{report.pelapor_nama || report.nama || 'Warga'}</span>
                         <span className="text-[11px] font-medium text-on-surface-variant/70">#{report.id}</span>
                       </div>
                     </td>
@@ -259,18 +261,17 @@ export default function ManajemenPetugas() {
                           <span className="material-symbols-outlined text-[18px]">construction</span>
                         </div>
                         <div className="flex flex-col">
-                          <span className="font-semibold text-on-surface">{report.jenis_gangguan}</span>
-                          <span className="text-[12px] text-on-surface-variant">{report.lokasi}</span>
+                          <span className="font-semibold text-on-surface">{report.jenis_gangguan || report.kategori}</span>
+                          <span className="text-[12px] text-on-surface-variant max-w-[200px] truncate">{report.lokasi}</span>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-5">
                       <span className={`inline-flex items-center gap-1.5 px-3 py-1 border rounded-full text-[10px] font-bold uppercase tracking-wider ${getStatusBadge(report.status)}`}>
                         <span className="material-symbols-outlined text-[14px]">{getStatusIcon(report.status)}</span>
-                        {report.status.toUpperCase()}
+                        {(report.status || 'Pending').toUpperCase()}
                       </span>
                     </td>
-                    <td className="px-6 py-5 text-sm text-on-surface-variant">{report.waktu}</td>
                     <td className="px-6 py-5">
                       <div className="flex justify-end gap-2">
                         <button className="px-3 py-1.5 bg-sigap-blue/10 text-sigap-blue rounded-lg text-xs font-bold hover:bg-sigap-blue hover:text-white transition-all" onClick={() => openModal('edit', report)}>
@@ -282,7 +283,11 @@ export default function ManajemenPetugas() {
                       </div>
                     </td>
                   </tr>
-                ))}
+                )) : (
+                  <tr>
+                    <td colSpan="4" className="text-center py-8 text-slate-500">Belum ada laporan.</td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
@@ -307,15 +312,15 @@ export default function ManajemenPetugas() {
             </div>
           </div>
         </div>
-
       </main>
 
+      {/* Modal Popup */}
       {modalOpen && (
         <div className="fixed inset-0 z-[100] bg-black/40 backdrop-blur-sm flex items-center justify-center px-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-xl font-bold text-sigap-blue">
-                {modalMode === 'create' ? 'Tambah Laporan' : modalMode === 'edit' ? 'Ubah Laporan' : 'Hapus Laporan'}
+                {modalMode === 'edit' ? 'Ubah Laporan' : 'Hapus Laporan'}
               </h3>
               <button className="text-slate-500 hover:text-slate-800" onClick={closeModal}>
                 <span className="material-symbols-outlined">close</span>
@@ -333,58 +338,20 @@ export default function ManajemenPetugas() {
             ) : (
               <div className="space-y-4">
                 <div>
-                  <label className="text-sm font-semibold text-slate-700">ID Laporan</label>
-                  <input
-                    value={activeReport.id}
-                    onChange={(e) => setActiveReport((prev) => ({ ...prev, id: e.target.value }))}
-                    className="w-full mt-1 px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sigap-blue/20 outline-none"
-                    placeholder="SIG-00000"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-semibold text-slate-700">Nama Pelapor</label>
-                  <input
-                    value={activeReport.pelapor_nama}
-                    onChange={(e) => setActiveReport((prev) => ({ ...prev, pelapor_nama: e.target.value }))}
-                    className="w-full mt-1 px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sigap-blue/20 outline-none"
-                    placeholder="Nama pelapor"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-semibold text-slate-700">Kategori Gangguan</label>
-                  <input
-                    value={activeReport.jenis_gangguan}
-                    onChange={(e) => setActiveReport((prev) => ({ ...prev, jenis_gangguan: e.target.value }))}
-                    className="w-full mt-1 px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sigap-blue/20 outline-none"
-                    placeholder="Jenis gangguan"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-semibold text-slate-700">Lokasi</label>
-                  <input
-                    value={activeReport.lokasi}
-                    onChange={(e) => setActiveReport((prev) => ({ ...prev, lokasi: e.target.value }))}
-                    className="w-full mt-1 px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sigap-blue/20 outline-none"
-                    placeholder="Lokasi kejadian"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-semibold text-slate-700">Status</label>
+                  <label className="text-sm font-semibold text-slate-700">Status Laporan</label>
                   <select
-                    value={activeReport.status}
+                    value={activeReport.status || 'Pending'}
                     onChange={(e) => setActiveReport((prev) => ({ ...prev, status: e.target.value }))}
                     className="w-full mt-1 px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sigap-blue/20 outline-none"
                   >
-                    <option>Pending</option>
-                    <option>Diproses</option>
-                    <option>Selesai</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Diproses">Diproses</option>
+                    <option value="Selesai">Selesai</option>
                   </select>
                 </div>
                 <div className="flex gap-3 justify-end mt-6">
                   <button className="px-4 py-2 rounded-lg bg-slate-200 text-slate-700" onClick={closeModal}>Batal</button>
-                  <button className="px-4 py-2 rounded-lg bg-sigap-blue text-white" onClick={handleSave}>
-                    {modalMode === 'create' ? 'Simpan' : 'Perbarui'}
-                  </button>
+                  <button className="px-4 py-2 rounded-lg bg-sigap-blue text-white" onClick={handleSave}>Perbarui</button>
                 </div>
               </div>
             )}

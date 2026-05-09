@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-// API base URL - dapat diubah di environment
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+// API base URL - Cukup gunakan /api agar Load Balancer AWS yang mengarahkan
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
 // Create axios instance
 const apiClient = axios.create({
@@ -49,18 +49,27 @@ export const getReportById = async (id) => {
  */
 export const createReport = async (formData) => {
   try {
+    // KUNCI SUKSES: Hapus headers manual. 
+    // Axios akan otomatis mendeteksi FormData dan membuatkan Content-Type + Boundary yang sangat presisi!
     const response = await axios.post(
       `${API_BASE_URL}/reports`,
-      formData,
-      {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      }
+      formData
     );
     return response.data;
   } catch (error) {
     console.error('Error creating report:', error);
+    throw error;
+  }
+};
+
+/**
+ * Delete a report
+ */
+export const deleteReport = async (id) => {
+  try {
+    const response = await apiClient.delete(`/reports/${id}`);
+    return response;
+  } catch (error) {
     throw error;
   }
 };
@@ -96,7 +105,8 @@ export const updateReportStatus = async (id, status) => {
  */
 export const checkBackendHealth = async () => {
   try {
-    const response = await axios.get(`http://localhost:5000/health`, {
+    // Diubah agar ikut menembak ke Load Balancer Backend
+    const response = await axios.get(`/api/health`, {
       timeout: 5000,
     });
     return response.data;

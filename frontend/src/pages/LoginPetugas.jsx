@@ -21,10 +21,21 @@ export default function LoginPetugas() {
     e.preventDefault()
     setLoading(true)
 
-    // Simulasi login
+    // Simulasi proses loading (biar ada efek muter sebentar)
     setTimeout(() => {
-      navigate('/manajemen')
-    }, 1500)
+      setLoading(false) // matikan efek loading
+      
+      // KUNCI GEMBOKNYA: Cek apakah inputnya cocok
+      if (formData.identity === 'petugas@gmail.com' && formData.password === 'sigap123') {
+        // Jika benar, simpan "kartu pengenal" di browser
+        localStorage.setItem('isOfficer', 'true')
+        // Lalu izinkan masuk ke halaman dashboard
+        navigate('/manajemen')
+      } else {
+        // Jika salah, tampilkan peringatan dan jangan pindah halaman
+        alert('Akses Ditolak! Email/Username atau Kata Sandi salah.')
+      }
+    }, 1000)
   }
 
   return (
