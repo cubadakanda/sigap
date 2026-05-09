@@ -1,4 +1,4 @@
-name: Deploy SIGAP to DockerHub and AWS ECS
+name: Deploy SIGAP to AWS ECR and ECS
 
 on:
   push:
@@ -8,41 +8,21 @@ on:
 env:
   AWS_REGION: ap-southeast-1
   ECS_CLUSTER: sigap-cluster
-  BACKEND_SERVICE: sigap-backend-final # SESUAIKAN JIKA NAMA SERVICE BACKEND-MU BERBEDA
-  FRONTEND_SERVICE: sigap-frontend-service # SESUAIKAN JIKA NAMA SERVICE FRONTEND-MU BERBEDA
-  DOCKER_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+  # Sesuaikan nama service di bawah jika berbeda dengan di AWS ECS kamu
+  BACKEND_SERVICE: sigap-backend-service 
+  FRONTEND_SERVICE: sigap-frontend-service
+  ECR_REPO_BACKEND: sigap-backend
+  ECR_REPO_FRONTEND: sigap-frontend
 
 jobs:
-  build-and-deploy:
-    name: Build, Push, and Deploy
+  deploy:
+    name: Build, Push to ECR, and Deploy
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      # 1. LOGIN KE DOCKER HUB
-      - name: Login to Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      # 2. BUILD & PUSH FRONTEND KE DOCKER HUB
-      - name: Build and Push Frontend
-        run: |
-          cd frontend
-          docker build -t $DOCKER_USERNAME/sigap-frontend:latest .
-          docker push $DOCKER_USERNAME/sigap-frontend:latest
-
-      # 3. BUILD & PUSH BACKEND KE DOCKER HUB
-      - name: Build and Push Backend
-        run: |
-          cd backend
-          docker build -t $DOCKER_USERNAME/sigap-backend:latest .
-          docker push $DOCKER_USERNAME/sigap-backend:latest
-
-      # 4. LOGIN KE AWS
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
@@ -50,20 +30,32 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      # 5. REFRESH MESIN ECS BACKEND
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and Push Backend to ECR
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: latest
+        run: |
+          cd backend
+          docker build -t $ECR_REGISTRY/${{ env.ECR_REPO_BACKEND }}:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/${{ env.ECR_REPO_BACKEND }}:$IMAGE_TAG
+
+      - name: Build and Push Frontend to ECR
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: latest
+        run: |
+          cd frontend
+          docker build -t $ECR_REGISTRY/${{ env.ECR_REPO_FRONTEND }}:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/${{ env.ECR_REPO_FRONTEND }}:$IMAGE_TAG
+
       - name: Update Backend ECS service
         run: |
-          aws ecs update-service \
-            --cluster ${{ env.ECS_CLUSTER }} \
-            --service ${{ env.BACKEND_SERVICE }} \
-            --force-new-deployment \
-            --region ${{ env.AWS_REGION }}
+          aws ecs update-service --cluster ${{ env.ECS_CLUSTER }} --service ${{ env.BACKEND_SERVICE }} --force-new-deployment --region ${{ env.AWS_REGION }}
 
-      # 6. REFRESH MESIN ECS FRONTEND
       - name: Update Frontend ECS service
         run: |
-          aws ecs update-service \
-            --cluster ${{ env.ECS_CLUSTER }} \
-            --service ${{ env.FRONTEND_SERVICE }} \
-            --force-new-deployment \
-            --region ${{ env.AWS_REGION }}
+          aws ecs update-service --cluster ${{ env.ECS_CLUSTER }} --service ${{ env.FRONTEND_SERVICE }} --force-new-deployment --region ${{ env.AWS_REGION }}
