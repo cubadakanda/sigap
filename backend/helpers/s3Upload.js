@@ -1,6 +1,7 @@
 const { PutObjectCommand } = require('@aws-sdk/client-s3');
 const s3Client = require('../config/aws');
 const { v4: uuidv4 } = require('uuid');
+const fs = require('fs'); // WAJIB TAMBAHKAN INI untuk membaca file dari hardisk
 require('dotenv').config();
 
 /**
@@ -20,13 +21,17 @@ const uploadFileToS3 = async (file) => {
     const fileExtension = file.originalname.split('.').pop();
     const fileName = `laporan/${timestamp}-${uuid}.${fileExtension}`;
 
+    // KUNCI PERBAIKAN 1: Baca file dari lokasi hardisk (file.path), bukan dari RAM (file.buffer)
+    const fileStream = fs.createReadStream(file.path);
+
     // Upload to S3
     const params = {
       Bucket: process.env.S3_BUCKET_NAME,
       Key: fileName,
-      Body: file.buffer,
+      Body: fileStream, // Menggunakan fileStream
       ContentType: file.mimetype,
-      ACL: 'public-read', // Make file publicly accessible through CloudFront
+      // KUNCI PERBAIKAN 2: Baris ACL ini WAJIB DIHAPUS/DICOMMENT agar tidak diblokir oleh sistem keamanan S3
+      // ACL: 'public-read', 
     };
 
     const command = new PutObjectCommand(params);
