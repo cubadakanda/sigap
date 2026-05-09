@@ -27,6 +27,7 @@ const uploadFileToS3 = async (file) => {
       Body: file.buffer, 
       ContentType: file.mimetype,
     };
+    
 
     const command = new PutObjectCommand(params);
     await s3Client.send(command);
