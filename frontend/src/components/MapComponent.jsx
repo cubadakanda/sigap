@@ -95,90 +95,61 @@ export default function MapComponent({ reports = [], onMarkerClick = null, onMap
   useEffect(() => {
     // Update markers when reports change
     if (mapInstanceRef.current) {
-      // Remove existing markers
-      markersRef.current.forEach(marker => marker.remove())
-      markersRef.current = []
+      markersRef.current.forEach(marker => marker.remove());
+      markersRef.current = [];
 
-      // Add new markers
       reports.forEach(report => {
-        
-        // --- LOGIKA PINTAR BACA KOORDINAT ---
-        let lat = -6.2088; // Default ke Jakarta jika semuanya gagal
-        let lng = 106.8456;
+        // 1. Tentukan titik awal (Default: Bandung agar tidak jauh-jauh)
+        let finalLat = -6.9147; 
+        let finalLng = 107.6098;
+        let isCoordValid = false;
 
+        // 2. Coba baca koordinat murni
         if (report.latitude && report.longitude) {
-          lat = parseFloat(report.latitude);
-          lng = parseFloat(report.longitude);
-        } else if (report.lokasi && report.lokasi.includes(',')) {
-          // Hapus teks "Koordinat:" dan ekstrak murni angkanya saja
-          const cleanLoc = report.lokasi.replace(/Koordinat:\s*/gi, '');
-          const parts = cleanLoc.split(',');
+          finalLat = parseFloat(report.latitude);
+          finalLng = parseFloat(report.longitude);
+          isCoordValid = true;
+        } 
+        // 3. Coba bongkar teks "Koordinat: -6.xxx, 107.xxx"
+        else if (report.lokasi && report.lokasi.includes(',')) {
+          // Kita bersihkan teks "Koordinat:" dan spasi
+          const cleanedText = report.lokasi.replace(/[a-zA-Z:\s]/g, ''); 
+          const parts = cleanedText.split(',');
           
           if (parts.length >= 2) {
-            const pLat = parseFloat(parts[0].trim());
-            const pLng = parseFloat(parts[1].trim());
+            const pLat = parseFloat(parts[0]);
+            const pLng = parseFloat(parts[1]);
             if (!isNaN(pLat) && !isNaN(pLng)) {
-              lat = pLat;
-              lng = pLng;
+              finalLat = pLat;
+              finalLng = pLng;
+              isCoordValid = true;
             }
           }
         }
-        // ------------------------------------
 
-        const kategori = report.jenis_gangguan || report.kategori || 'Laporan Masuk'
-        const pelapor = report.pelapor_nama || report.nama || 'Warga'
-        const imageUrl = report.image_url || report.foto
-        const deskripsi = report.deskripsi || report.lokasi || 'Tidak ada deskripsi'
-        const statusReport = report.status || 'Pending'
+        // 4. HANYA buat marker jika koordinat valid (Mencegah marker numpuk di Jakarta)
+        if (isCoordValid) {
+          const color = getMarkerColor(report.status || 'Pending');
+          const marker = L.marker([finalLat, finalLng], {
+            icon: createMarkerIcon(color),
+          });
 
-        const color = getMarkerColor(statusReport)
-        const marker = L.marker([lat, lng], {
-          icon: createMarkerIcon(color),
-        })
-
-        // Add popup with report info
-        const popupContent = `
-          <div style="width: 250px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
-            <div style="margin-bottom: 8px;">
-              <span style="background-color: ${color}; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; text-transform: uppercase;">
-                ${statusReport}
-              </span>
+          const popupContent = `
+            <div style="width: 220px;">
+              <strong style="color: ${color}; text-transform: uppercase;">${report.status || 'PENDING'}</strong><br/>
+              <b>${report.jenis_gangguan || 'Gangguan'}</b><br/>
+              <small>${report.lokasi}</small>
+              ${(report.image_url || report.foto) ? `<img src="${report.image_url || report.foto}" style="width:100%; border-radius:5px; margin-top:8px;"/>` : ''}
             </div>
-            <div style="margin-bottom: 6px;">
-              <strong>${kategori}</strong>
-            </div>
-            <div style="margin-bottom: 6px; font-size: 13px; color: #666;">
-              <strong>Pelapor:</strong> ${pelapor}
-            </div>
-            <div style="margin-bottom: 6px; font-size: 13px; color: #666;">
-              <strong>Deskripsi:</strong> ${deskripsi}
-            </div>
-            <div style="margin-bottom: 6px; font-size: 12px; color: #999;">
-              <strong>ID:</strong> #${report.id}
-            </div>
-            ${imageUrl ? `<div style="margin-top: 8px;">
-              <img src="${imageUrl}" style="width: 100%; border-radius: 4px; max-height: 150px; object-fit: cover; border: 1px solid #eee;" alt="Bukti Lapangan" />
-            </div>` : ''}
-          </div>
-        `
+          `;
 
-        marker.bindPopup(popupContent, {
-          maxWidth: 280,
-          maxHeight: 300,
-        })
-
-        marker.addTo(mapInstanceRef.current)
-        markersRef.current.push(marker)
-
-        // Handle marker click
-        marker.on('click', () => {
-          if (onMarkerClick) {
-            onMarkerClick(report)
-          }
-        })
-      })
+          marker.bindPopup(popupContent);
+          marker.addTo(mapInstanceRef.current);
+          markersRef.current.push(marker);
+        }
+      });
     }
-  }, [reports, onMarkerClick])
+  }, [reports, onMarkerClick]);
 
   return (
     <div 
