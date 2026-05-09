@@ -1,24 +1,8 @@
 const multer = require('multer');
 const path = require('path');
-const fs = require('fs');
 
-// Ensure uploads directory exists
-const uploadsDir = path.join(__dirname, '../uploads');
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
-}
-
-// Configure multer for local disk storage
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadsDir);
-  },
-  filename: (req, file, cb) => {
-    const timestamp = Date.now();
-    const uniqueSuffix = Math.round(Math.random() * 1E9);
-    cb(null, `${timestamp}-${uniqueSuffix}${path.extname(file.originalname)}`);
-  },
-});
+// MENGGUNAKAN MEMORY STORAGE (Sangat aman untuk Docker & AWS ECS)
+const storage = multer.memoryStorage();
 
 // File filter to accept only image files
 const fileFilter = (req, file, cb) => {
